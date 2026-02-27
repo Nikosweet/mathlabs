@@ -1,10 +1,9 @@
-import asyncio
 from math import inf
 
 
 class Matrix:
     @classmethod
-    async def input_matrix(cls):
+    def input_matrix(cls):
         rows = int(input('Введите количество строк в матрицах: \n'))
         print('Введите строки матриц через пробел, начиная со значений А')
         matrix = []
@@ -22,9 +21,9 @@ class Matrix:
         return matrix, rows
 
     @classmethod
-    async def diagonal_dominance(cls, matrix: list = None, rows: int = None):
+    def diagonal_dominance(cls, matrix: list = None, rows: int = None):
         if matrix == None or rows == None:
-            (matrix, rows) = await cls.input_matrix()
+            (matrix, rows) = cls.input_matrix()
 
         obj = {}
         for row in matrix:
@@ -48,15 +47,14 @@ class Matrix:
         new_matrix = []
         for i in range(len(obj)):
             new_matrix.append(obj[i])
-        print(new_matrix)
         return [new_matrix, rows]
 
 
 class Gauss(Matrix):
     @classmethod
-    async def straight_stroke_simple(cls, matrix: list = None, rows: int = None):
+    def straight_stroke_simple(cls, matrix: list = None, rows: int = None):
         if matrix is None or rows is None:
-            (matrix, rows) = await cls.input_matrix()
+            (matrix, rows) = cls.input_matrix()
 
 
         n = len(matrix[0]) - 1
@@ -76,9 +74,9 @@ class Gauss(Matrix):
 
 
     @classmethod
-    async def straight_stroke(cls, matrix: list = None, rows: int = None):
+    def straight_stroke(cls, matrix: list = None, rows: int = None):
         if matrix is None or rows is None:
-            (matrix, rows) = await cls.input_matrix()
+            (matrix, rows) = cls.input_matrix()
 
 
         strA_len = len(matrix[0]) - 1
@@ -112,10 +110,10 @@ class Gauss(Matrix):
         return [matrix, rows]
 
     @classmethod
-    async def remove_null(cls, matrix: list = None, rows: int = None, *, simple: bool = False):
+    def remove_null(cls, matrix: list = None, rows: int = None, *, simple: bool = False):
         if matrix == None or rows == None:
-            if simple: (matrix, rows) = await cls.straight_stroke_simple()
-            else: (matrix, rows) = await cls.straight_stroke()
+            if simple: (matrix, rows) = cls.straight_stroke_simple()
+            else: (matrix, rows) = cls.straight_stroke()
 
         for i in range(rows - 1, -1, -1):
             count_not_null = 0
@@ -131,10 +129,10 @@ class Gauss(Matrix):
         return [matrix, rows]
 
     @classmethod
-    async def back_stroke(cls, matrix: list = None, rows: int = None, *, simple: bool = False):
+    def back_stroke(cls, matrix: list = None, rows: int = None, *, simple: bool = False):
         if matrix == None or rows == None:
-            if simple: (matrix, rows) = await cls.remove_null(1)
-            else: (matrix, rows) = await cls.remove_null()
+            if simple: (matrix, rows) = cls.remove_null(1)
+            else: (matrix, rows) = cls.remove_null()
         if rows == len(matrix):
             print('Данная система имеет лишь одно решение!')
             answer = []
@@ -142,7 +140,7 @@ class Gauss(Matrix):
             for i in range(rows - 1, -1, -1):
                 r = 0
                 print(f'Строка: {matrix[i]}')
-                for j in range(rows-1, k-1, -1):
+                for j in range(rows-1, k-1, -1): # Не запускается на первой итерации
                     matrix[i][-1] = matrix[i][-1] - (answer[r] * matrix[i][j])
                     r += 1
                 else:
@@ -154,9 +152,9 @@ class Gauss(Matrix):
 
 class Seidel(Matrix):
     @classmethod
-    async def check_data(cls, matrix: list = None, rows: int = None):
+    def check_data(cls, matrix: list = None, rows: int = None):
         if matrix == None or rows == None:
-            (matrix, rows) = await cls.input_matrix()
+            (matrix, rows) = cls.input_matrix()
         for row in matrix:
             sum = 0
             central = 0
@@ -167,9 +165,9 @@ class Seidel(Matrix):
 
 
     @classmethod
-    async def matrix_norm1(cls, matrix: list = None, rows: int = None):
+    def matrix_norm1(cls, matrix: list = None, rows: int = None):
         if matrix == None or rows == None:
-            (matrix, rows) = await cls.input_matrix()
+            (matrix, rows) = cls.input_matrix()
         max_sum = 0
         for j in range(rows):
             sum = 0
@@ -182,9 +180,9 @@ class Seidel(Matrix):
 
 
     @classmethod
-    async def matrix_normk(cls, matrix: list = None, rows: int = None):
+    def matrix_normk(cls, matrix: list = None, rows: int = None):
         if matrix == None or rows == None:
-            (matrix, rows) = await cls.input_matrix()
+            (matrix, rows) = cls.input_matrix()
         sum = 0
 
         for i in range(rows):
@@ -195,25 +193,25 @@ class Seidel(Matrix):
 
 
     @classmethod
-    async def method(cls, matrix: list = None, rows: int = None, *,
-                     diagonal_dominance: bool = True,
-                     condition_check: bool = True,
-                     good_ending_condition: bool = True):
+    def method(cls, matrix: list = None, rows: int = None, *,
+            diagonal_dominance: bool = True,
+            condition_check: bool = True,
+            good_ending_condition: bool = True):
         if matrix == None or rows == None:
-            if diagonal_dominance: (matrix, rows) = await cls.diagonal_dominance()
-            else: (matrix, rows) = await cls.input_matrix()
+            if diagonal_dominance: (matrix, rows) = cls.diagonal_dominance()
+            else: (matrix, rows) = cls.input_matrix()
 
 
         e = 10e-10000
         if good_ending_condition:
-            condition = (1 - await cls.matrix_norm1(matrix, rows)) / await cls.matrix_normk(matrix, rows) * e
+            condition = (1 - cls.matrix_norm1(matrix, rows)) / cls.matrix_normk(matrix, rows) * e
         else: condition = e
 
 
         answers = [0 for row in matrix]
         last_step = inf
         if condition_check:
-            await cls.check_data(matrix, rows)
+            cls.check_data(matrix, rows)
             print('Проверка сходимости выполнена успешно!')
         while (abs(last_step) > abs(condition)):
             max_change = 0
@@ -237,9 +235,9 @@ class Seidel(Matrix):
 
 class Thomas(Gauss):
     @classmethod
-    async def is_tridiagonal(cls, matrix: list = None, rows: int = None):
+    def is_tridiagonal(cls, matrix: list = None, rows: int = None):
         if matrix == None or rows == None:
-            (matrix, rows) = await cls.input_matrix()
+            (matrix, rows) = cls.input_matrix()
 
         for i in range(rows):
             if matrix[i][i] == 0:
@@ -250,13 +248,13 @@ class Thomas(Gauss):
 
 
     @classmethod
-    async def method(cls, matrix: list = None, rows: int = None):
+    def method(cls, matrix: list = None, rows: int = None):
         if matrix == None or rows == None:
-            (matrix, rows) = await cls.input_matrix()
+            (matrix, rows) = cls.input_matrix()
 
-        (matrix, rows) = await cls.diagonal_dominance(matrix, rows)
+        (matrix, rows) = cls.diagonal_dominance(matrix, rows)
 
-        await cls.is_tridiagonal(matrix, rows)
+        cls.is_tridiagonal(matrix, rows)
 
         answers = [0 for _ in range(rows)]
         for i in range(1, rows):
@@ -277,7 +275,7 @@ class Thomas(Gauss):
 #print('Метод Зейделя с проверкой условия и перестановкой матрицы\n', asyncio.run(Seidel.method()))
 #print('Метод Зейделя c проверкой условия и ошибкой, т.к. оно не выполняется\n', asyncio.run(Seidel.method(diagonal_dominance=False)))
 #print('Метод Зейделя\n', asyncio.run(Seidel.method(condition_check=False, diagonal_dominance=False)))
-print('Метод Томаса\n', asyncio.run(Thomas.method()))
+#print('Метод Томаса\n', asyncio.run(Thomas.method()))
 
 #Для гаусса:
 '''
