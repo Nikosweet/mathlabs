@@ -1,3 +1,4 @@
+from math import inf
 from typing import Callable
 from Math_lab2 import Thomas
 import matplotlib.pyplot as plt
@@ -36,6 +37,11 @@ class NumberOne:
 class CubicSpline(Functions):
     @classmethod
     def cubic_spline(cls, x: list, f: list):
+        if (len(x) != len(f)): raise ValueError('Number of points is not defined!')
+        last_el = -inf
+        for x_val in x:
+            if x_val < last_el: raise ValueError('x array is unsorted!')
+            last_el = x_val
         try:
             h = []
             for i in range(1, len(x)):
@@ -108,7 +114,7 @@ class CubicSpline(Functions):
             all_y.extend(y_seg)
             all_y_first_derivative.extend(y_seg_first_derivative)
             all_y_second_derivative.extend(y_seg_second_derivative)
-            print("Первая производная: \n", y_seg_first_derivative, "\n, Вторая производная: \n", y_seg_second_derivative)
+            #print("Первая производная: \n", y_seg_first_derivative, "\n, Вторая производная: \n", y_seg_second_derivative)
 
         plt.plot(all_x, all_y, 'b-', linewidth=2, label='Сплайн')
         plt.plot(all_x, all_y_first_derivative, linewidth=2, label='Первая производная', color='orange')
@@ -123,6 +129,6 @@ class CubicSpline(Functions):
         plt.savefig('cubicspline.png', dpi=300, bbox_inches='tight')
 
 #NumberOne.first_number()
-#CubicSpline.draw_cubic_spline([-2, 0, 2, 3, 4], [18, 12, 7, -1, 0])
+CubicSpline.draw_cubic_spline([-2, 1, 2, 4, 6], [8, 12, 7, -4, 0])
 
 
