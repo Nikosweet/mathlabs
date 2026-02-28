@@ -122,7 +122,7 @@ class CubicSpline(Functions):
         plt.legend()
         plt.savefig('cubicspline.png', dpi=300, bbox_inches='tight')
 
-
-CubicSpline.draw_cubic_spline([-2, 0, 2, 3, 4], [18, 12, 7, -1, 0])
+#NumberOne.first_number()
+#CubicSpline.draw_cubic_spline([-2, 0, 2, 3, 4], [18, 12, 7, -1, 0])
 
 
