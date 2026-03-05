@@ -28,7 +28,7 @@ class Solutions(Functions):
         return cls.Eiler_recursive(x_new, y_new, xn, h, func)
 
     @staticmethod
-    def Eiler(x0: float, y0: float, xn: float, h: float = 1e-5, *, func: Callable = Functions.f1):
+    def Eiler(x0: float, y0: float, xn: float, h: float = 1e-40, *, func: Callable = Functions.f1):
         if not h:
             raise ValueError('incorrect value of h')
 
@@ -53,13 +53,13 @@ class Solutions(Functions):
 
 
     @staticmethod
-    def Runge_Kutte_Merson(x0: float, y0: float, xn: float, h: float = 1e-5, e: float = 1e-120, *, func: Callable = Functions.f1):
+    def Runge_Kutte_Merson(x0: float, y0: float, xn: float, h: float = 1e-20, e: float = 1e-21, *, func: Callable = Functions.f1):
         if not h:
             raise ValueError('incorrect value of h')
         if h > 0 and x0 > xn:
             h = -h
 
-        min_h = 1e-240
+        min_h = 1e-120
         x = []
         y = []
 
@@ -75,13 +75,13 @@ class Solutions(Functions):
             k4 = h * func(x0 + h/2, y0 + k1/8 + 3*k3/8)
             k5 = h * func(x0 + h, y0 + k1/2 - 3*k3/2 + 2 * k4)
 
-            y_accur = y0 + k1/6 + 2*k4/3 + k5 / 6
-            y_draft = y0 + k1/2 - 3 * k3 / 2 + 2 * k4
+            y_accur = y0 + k1/6 + 2*k3/3 + k4 / 6
+            y_draft = k1 - 9/2 * k3 + 4 * k4 - 0.5 * k5
 
-            R = 0.2 * abs(y_accur - y_draft)
+            R = 0.2 * abs(y_draft)
             if R > e: h /= 2
 
-            elif R < e/64:
+            elif R < e/128:
                 y.append(y0)
                 x.append(x0)
                 y0 = y_accur
@@ -134,7 +134,7 @@ class Solutions(Functions):
 
 
     @classmethod
-    def draw(cls, x0: float, y0: float, xn: float, h: float = 1e-5, *, func: Callable = Functions.f1, method: Callable = Eiler, name: str = 'Function'):
+    def draw(cls, x0: float, y0: float, xn: float, h: float = 1e-6, *, func: Callable = Functions.f1, method: Callable = Eiler, name: str = 'Function'):
         y0, x, y = method(x0, y0, xn, h, func=func)
         plt.plot(x, y, 'b-', linewidth=2, label='function')
         plt.xlabel('x')
@@ -148,7 +148,7 @@ class Solutions(Functions):
 
 
 
-#print(Solutions.Eiler_recursive(0, 0, 10)) #Велика вероятность переполнения стека вызовов
+#print(Solutions.Eiler_recursive(0, 0, 10)) # Велика вероятность переполнения стека вызовов
 #print(Solutions.Eiler(0, 0, 10)[0])
 #print(Solutions.Runge_Kutte_Merson(0, 0, 10))
 #print(Solutions.Eiler_Adams(0, 0, 10))
