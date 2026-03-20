@@ -269,13 +269,13 @@ class Thomas(Gauss):
         return answers
 
 
-#print('Метод Гаусса без выбора главного элемента\n', asyncio.run(Gauss.back_stroke(simple=True)))
-#print('Метод Гаусса\n', asyncio.run(Gauss.back_stroke()))
-#print('Метод Зейделя с перестановкой матрицы\n', asyncio.run(Seidel.method(condition_check=False)))
-#print('Метод Зейделя с проверкой условия и перестановкой матрицы\n', asyncio.run(Seidel.method()))
-#print('Метод Зейделя c проверкой условия и ошибкой, т.к. оно не выполняется\n', asyncio.run(Seidel.method(diagonal_dominance=False)))
-#print('Метод Зейделя\n', asyncio.run(Seidel.method(condition_check=False, diagonal_dominance=False)))
-#print('Метод Томаса\n', asyncio.run(Thomas.method()))
+print('Метод Гаусса без выбора главного элемента\n', Gauss.back_stroke(simple=True))
+#print('Метод Гаусса\n', Gauss.back_stroke())
+#print('Метод Зейделя с перестановкой матрицы\n', Seidel.method(condition_check=False))
+#print('Метод Зейделя с проверкой условия и перестановкой матрицы\n', Seidel.method())
+#print('Метод Зейделя c проверкой условия и ошибкой, т.к. оно не выполняется\n', Seidel.method(diagonal_dominance=False))
+#print('Метод Зейделя\n', Seidel.method(condition_check=False, diagonal_dominance=False))
+#print('Метод Томаса\n', Thomas.method())
 
 #Для гаусса:
 '''

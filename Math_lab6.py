@@ -28,7 +28,7 @@ class Solutions(Functions):
         return cls.Eiler_recursive(x_new, y_new, xn, h, func)
 
     @staticmethod
-    def Eiler(x0: float, y0: float, xn: float, h: float = 1e-40, *, func: Callable = Functions.f1):
+    def Eiler(x0: float, y0: float, xn: float, h: float = 1e-6, *, func: Callable = Functions.f1):
         if not h:
             raise ValueError('incorrect value of h')
 
@@ -51,54 +51,62 @@ class Solutions(Functions):
 
         return (y0, x, y)
 
-
     @staticmethod
-    def Runge_Kutte_Merson(x0: float, y0: float, xn: float, h: float = 1e-20, e: float = 1e-21, *, func: Callable = Functions.f1):
+    def Runge_Kutte_Merson(x0: float, y0: float, xn: float, h: float = 1e-3, e: float = 1e-21,
+                           *, func: Callable = Functions.f1):
         if not h:
             raise ValueError('incorrect value of h')
         if h > 0 and x0 > xn:
             h = -h
 
-        min_h = 1e-120
-        x = []
-        y = []
+        min_h = 1e-12
+        max_h = abs(xn - x0)
+        x = [x0]
+        y = [y0]
 
         while (h > 0 and x0 < xn) or (h < 0 and x0 > xn):
-
             if abs(h) < min_h:
                 print(f"Warning: Step too small ({h}), stopping at x={x0}")
-                return y0
+                break
+
+            if (h > 0 and x0 + h > xn) or (h < 0 and x0 + h < xn):
+                h = xn - x0
+
+            x_current = x0
+            y_current = y0
+            h_current = h
 
             k1 = h * func(x0, y0)
-            k2 = h * func(x0 + h/3, y0 + k1/3)
-            k3 = h * func(x0 + h/3, y0 + k1/6 + k2/6)
-            k4 = h * func(x0 + h/2, y0 + k1/8 + 3*k3/8)
-            k5 = h * func(x0 + h, y0 + k1/2 - 3*k3/2 + 2 * k4)
+            k2 = h * func(x0 + h / 3, y0 + k1 / 3)
+            k3 = h * func(x0 + h / 3, y0 + k1 / 6 + k2 / 6)
+            k4 = h * func(x0 + h / 2, y0 + k1 / 8 + 3 * k3 / 8)
+            k5 = h * func(x0 + h, y0 + k1 / 2 - 3 * k3 / 2 + 2 * k4)
 
-            y_accur = y0 + k1/6 + 2*k3/3 + k4 / 6
-            y_draft = k1 - 9/2 * k3 + 4 * k4 - 0.5 * k5
+            y_new = y0 + (k1 + 4 * k4 + k5) / 6
 
-            R = 0.2 * abs(y_draft)
-            if R > e: h /= 2
+            error = abs(2 * k1 - 9 * k3 + 8 * k4 - k5) / 30
 
-            elif R < e/128:
-                y.append(y0)
-                x.append(x0)
-                y0 = y_accur
-                x0 += h
-                h *= 2
+            if error > e:
+                h = h_current / 2
+                x0 = x_current
+                y0 = y_current
+                continue
 
-            else:
-                y.append(y0)
-                x.append(x0)
-                y0 = y_accur
-                x0 += h
+            x0 = x_current + h_current
+            y0 = y_new
+            x.append(x0)
+            y.append(y0)
 
-        return (y0, x, y)
+            if error < e / 10:
+                h = min(h_current * 2, max_h)
+            elif error < e / 50:
+                h = min(h_current * 1.5, max_h)
+
+        return y0, x, y
 
     @staticmethod
-    def Eiler_Adams(x_prelast: float, y_prelast: float, xn: float, h: float = 1e-5, e: float = 1e-120, func: Callable = Functions.f1):
-
+    def Eiler_Adams(x_prelast: float, y_prelast: float, xn: float, h: float = 1e-14, e: float = 1e-14,
+                    func: Callable = Functions.f1):
         if not h:
             raise ValueError('incorrect value of h')
         if h > 0 and x_prelast > xn:
@@ -107,28 +115,53 @@ class Solutions(Functions):
         x = [x_prelast]
         y = [y_prelast]
 
-        fx = func(x_prelast, y_prelast)
+        k1 = h * func(x_prelast, y_prelast)
+        k2 = h * func(x_prelast + h / 2, y_prelast + k1 / 2)
+        k3 = h * func(x_prelast + h / 2, y_prelast + k2 / 2)
+        k4 = h * func(x_prelast + h, y_prelast + k3)
 
-        x_last = x_prelast +h
-        y_last = y_prelast + h * fx
+        x_last = x_prelast + h
+        y_last = y_prelast + (k1 + 2 * k2 + 2 * k3 + k4) / 6
 
         x.append(x_last)
         y.append(y_last)
 
         while (h > 0 and x_last < xn) or (h < 0 and x_last > xn):
-            temp = y_last
-            y_last += h/2 * (3 * func(x_last, y_last) - func(x_prelast, y_prelast))
-            y_prelast = temp
+            current_h = h
+            current_x_prelast = x_prelast
+            current_y_prelast = y_prelast
+            current_x_last = x_last
+            current_y_last = y_last
+
+            f_last = func(current_x_last, current_y_last)
+            f_prelast = func(current_x_prelast, current_y_prelast)
+            y_predict = current_y_last + current_h / 2 * (3 * f_last - f_prelast)
+
+            f_predict = func(current_x_last + current_h, y_predict)
+            y_correct = current_y_last + current_h / 2 * (f_last + f_predict)
+
+            error = abs(y_correct - y_predict) / 3
+
+            if error > e:
+                h = current_h / 2
+                x_last = current_x_prelast
+                y_last = current_y_prelast
+                continue
+
+            x_prelast = current_x_last
+            y_prelast = current_y_last
+            x_last = current_x_last + current_h
+            y_last = y_correct
+
+            x.append(x_last)
             y.append(y_last)
 
-            x_prelast = x_last
-            x_last += h
-            x.append(x_last)
+            if error < e / 10:
+                h = current_h * 1.1
+            else:
+                h = current_h
 
-
-        return (y_last, x, y)
-
-
+        return y_last, x, y
 
 
 
@@ -149,10 +182,10 @@ class Solutions(Functions):
 
 
 #print(Solutions.Eiler_recursive(0, 0, 10)) # Велика вероятность переполнения стека вызовов
-#print(Solutions.Eiler(0, 0, 10)[0])
-#print(Solutions.Runge_Kutte_Merson(0, 0, 10))
-#print(Solutions.Eiler_Adams(0, 0, 10))
+print('Эйлер: ',Solutions.Eiler(0, 0, 10)[0])
+print('Рунге-Кутты-Мерсона: ',Solutions.Runge_Kutte_Merson(0, 0, 10)[0])
+print("Эйлера-Адамса: ",Solutions.Eiler_Adams(0, 0, 10)[0])
 
-print(Solutions.draw(0, 0, 10, method=Solutions.Eiler, name='Эйлер'))
-print(Solutions.draw(0, 0, 10, method=Solutions.Runge_Kutte_Merson, name = 'Рунге-Кутте-Мерсон'))
-print(Solutions.draw(0, 0, 10, method=Solutions.Eiler_Adams, name = 'Эйлер-Адамс'))
+#print(Solutions.draw(0, 0, 10, method=Solutions.Eiler, name='Эйлер'))
+#print(Solutions.draw(0, 0, 10, method=Solutions.Runge_Kutte_Merson, name = 'Рунге-Кутте-Мерсон'))
+#print(Solutions.draw(0, 0, 10, method=Solutions.Eiler_Adams, name = 'Эйлер-Адамс'))

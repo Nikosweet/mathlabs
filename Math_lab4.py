@@ -130,5 +130,3 @@ class CubicSpline(Functions):
 
 #NumberOne.first_number()
 CubicSpline.draw_cubic_spline([-2, 1, 2, 4, 6], [8, 12, 7, -4, 0])
-
-
