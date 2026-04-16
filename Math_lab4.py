@@ -1,3 +1,5 @@
+#Разрывы
+#Производная по-другому
 from math import inf
 from typing import Callable
 from Math_lab2 import Thomas
@@ -10,15 +12,19 @@ class Functions:
         return 4 * x**2
 
     @classmethod
-    def first_derivative(cls, x: float = 0, func: Callable = f, h: float = 10**(-11)) -> float:
+    def first_derivative(cls, x: float = 0, func: Callable = f, h: float = 1) -> float:
         return (func(x+h) - func(x)) / (x+h - x)
 
     @classmethod
-    def first_derivative_second(cls, x: float = 0, func: Callable = f, h: float = 1e-8) -> float:
+    def first_derivative_second(cls, x: float = 0, func: Callable | list = f, h: float = 1) -> float:
+        if type(func) == list:
+            return ((func[1] - func[0]) / (2*h))
         return (func(x+h) - func(x-h))/ (2*h)
 
     @classmethod
-    def second_derivative(cls, x: float = 0, func: Callable = f, h: float = 1e-5) -> float:
+    def second_derivative(cls, x: float = 0, func: Callable | list = f, h: float = 1) -> float:
+        if type(func) == list:
+            return (func[2] - 2 * func[1] + func[0] / (4 * h**2))
         return (func(x + 2 * h) - 2 * func(x) + func(x-2*h)) / (4 * h**2)
 
 class NumberOne:
@@ -39,8 +45,18 @@ class CubicSpline(Functions):
     def cubic_spline(cls, x: list, f: list):
         if (len(x) != len(f)): raise ValueError('Number of points is not defined!')
         last_el = -inf
+        dict = {}
+        for i in range(len(x)):
+            dict[x[i]] = f[i]
+
+        x.sort()
+
+        for i in range(len(x)):
+            f[i] = dict[x[i]]
+
         for x_val in x:
             if x_val < last_el: raise ValueError('x array is unsorted!')
+            if x_val == last_el: raise ValueError('Two same x in one function!')
             last_el = x_val
         try:
             h = []
@@ -61,7 +77,6 @@ class CubicSpline(Functions):
                 A[-1][-1] = 2*(h[-2]+h[-1])
                 A[-1][-2] = h[-2]
             for i in range(n): A[i].append(B[i])
-
             c = Thomas.method(A, n)
             c = [0, *c, 0]
 
@@ -95,7 +110,7 @@ class CubicSpline(Functions):
         all_y_first_derivative = []
         all_y_second_derivative = []
         for i in range(len(x)-1):
-            x_seg = np.linspace(x[i], x[i+1], 150)
+            x_seg = np.linspace(x[i], x[i+1], 5)
             dx = x_seg - x[i]
 
             cubic_spline_function = cls.__get_cubic_spline_function(f[i], b[i], c[i], d[i])
@@ -114,7 +129,8 @@ class CubicSpline(Functions):
             all_y.extend(y_seg)
             all_y_first_derivative.extend(y_seg_first_derivative)
             all_y_second_derivative.extend(y_seg_second_derivative)
-            #print("Первая производная: \n", y_seg_first_derivative, "\n, Вторая производная: \n", y_seg_second_derivative)
+
+            print("Первая производная: \n", y_seg_first_derivative, "\n, Вторая производная: \n", y_seg_second_derivative)
 
         plt.plot(all_x, all_y, 'b-', linewidth=2, label='Сплайн')
         plt.plot(all_x, all_y_first_derivative, linewidth=2, label='Первая производная', color='orange')
@@ -129,4 +145,16 @@ class CubicSpline(Functions):
         plt.savefig('cubicspline.png', dpi=300, bbox_inches='tight')
 
 #NumberOne.first_number()
-CubicSpline.draw_cubic_spline([-2, 1, 2, 4, 6], [8, 12, 7, -4, 0])
+CubicSpline.draw_cubic_spline([0, -2, 5, 6, 10], [0, 4, 25, 36, 100])
+
+print(CubicSpline.first_derivative(0))
+print(CubicSpline.first_derivative(2))
+print(CubicSpline.first_derivative(5))
+print(CubicSpline.first_derivative(6))
+print(CubicSpline.first_derivative(10))
+
+print(CubicSpline.second_derivative(0))
+print(CubicSpline.second_derivative(2))
+print(CubicSpline.second_derivative(5))
+print(CubicSpline.second_derivative(6))
+print(CubicSpline.second_derivative(10))

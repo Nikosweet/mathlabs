@@ -269,7 +269,7 @@ class Thomas(Gauss):
         return answers
 
 
-print('Метод Гаусса без выбора главного элемента\n', Gauss.back_stroke(simple=True))
+#print('Метод Гаусса без выбора главного элемента\n', Gauss.back_stroke(simple=True))
 #print('Метод Гаусса\n', Gauss.back_stroke())
 #print('Метод Зейделя с перестановкой матрицы\n', Seidel.method(condition_check=False))
 #print('Метод Зейделя с проверкой условия и перестановкой матрицы\n', Seidel.method())

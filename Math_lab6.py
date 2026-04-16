@@ -59,7 +59,7 @@ class Solutions(Functions):
         if h > 0 and x0 > xn:
             h = -h
 
-        min_h = 1e-12
+        min_h = 1e-100
         max_h = abs(xn - x0)
         x = [x0]
         y = [y0]
@@ -182,10 +182,30 @@ class Solutions(Functions):
 
 
 #print(Solutions.Eiler_recursive(0, 0, 10)) # Велика вероятность переполнения стека вызовов
-print('Эйлер: ',Solutions.Eiler(0, 0, 10)[0])
-print('Рунге-Кутты-Мерсона: ',Solutions.Runge_Kutte_Merson(0, 0, 10)[0])
-print("Эйлера-Адамса: ",Solutions.Eiler_Adams(0, 0, 10)[0])
+print('Эйлер, h = 10e-4 ',Solutions.Eiler(0, 0, 10, 10e-4)[0])
+print('Рунге-Кутты-Мерсона, h = 10e-15, e = 10e-15',Solutions.Runge_Kutte_Merson(0, 0, 10, 10e-15, 10e-15)[0])
+print("Эйлера-Адамса, h = 10e-10, e = 10e-10",Solutions.Eiler_Adams(0, 0, 10, 10e-10, 10e-10)[0])
 
+print('Эйлер, h = 10e-2 ',Solutions.Eiler(0, 0, 10, 10e-2)[0])
+print('Рунге-Кутты-Мерсона, h = 10e-10, e = 10e-10',Solutions.Runge_Kutte_Merson(0, 0, 10, 10e-10, 10e-10)[0])
+print("Эйлера-Адамса, h = 6e-10, e = 6e-10",Solutions.Eiler_Adams(0, 0, 10, 6e-10, 6e-10)[0])
+
+print('Эйлер, h = 1 ',Solutions.Eiler(0, 0, 10, 1)[0])
+print('Рунге-Кутты-Мерсона, h = 5e-10, e = 5e-10',Solutions.Runge_Kutte_Merson(0, 0, 10, 5e-10, 5e-10)[0])
+print("Эйлера-Адамса, h = 3e-10, e = 3e-10",Solutions.Eiler_Adams(0, 0, 10, 3e-10, 3e-10)[0])
+
+print('Эйлер, h = 10 ',Solutions.Eiler(0, 0, 10, 10)[0])
+print('Рунге-Кутты-Мерсона, h = 2e-10, e = 2e-10',Solutions.Runge_Kutte_Merson(0, 0, 10, 2e-10, 2e-10)[0])
+print("Эйлера-Адамса, h = 2e-10, e = 2e-10",Solutions.Eiler_Adams(0, 0, 10, 2e-10, 2e-10)[0])
+
+print('Рунге-Кутты-Мерсона, h = 1e-10, e = 1e-10',Solutions.Runge_Kutte_Merson(0, 0, 10, 1e-10, 1e-10)[0])
+print("Эйлера-Адамса, h = 1e-10, e = 1e-10",Solutions.Eiler_Adams(0, 0, 10, 1e-10, 1e-10)[0])
+print('Рунге-Кутты-Мерсона, h = 1, e = 1',Solutions.Runge_Kutte_Merson(0, 0, 10, 1, 1)[0])
+print("Эйлера-Адамса, h = 1, e = 1",Solutions.Eiler_Adams(0, 0, 10, 1, 1)[0])
+
+
+print('Рунге-Кутты-Мерсона, h = 10, e = 10',Solutions.Runge_Kutte_Merson(0, 0, 10, 10, 10)[0])
+print("Эйлера-Адамса, h = 10, e = 10",Solutions.Eiler_Adams(0, 0, 10, 10, 10)[0])
 #print(Solutions.draw(0, 0, 10, method=Solutions.Eiler, name='Эйлер'))
 #print(Solutions.draw(0, 0, 10, method=Solutions.Runge_Kutte_Merson, name = 'Рунге-Кутте-Мерсон'))
 #print(Solutions.draw(0, 0, 10, method=Solutions.Eiler_Adams, name = 'Эйлер-Адамс'))

@@ -1,79 +1,164 @@
-class NumberOne:
-    @staticmethod
-    def number_one():
-        x = [[10, 10, 10, 10, 10], [10, 10, 10, 10]]
-        yA0 = 500
-        yB0 = 500
-        y = [[500, 500], [50, 50, 50], [50, 50], [25, 50]]
-        total_details = [0, 0]
-        yCA0 = 25
-        yCB0 = 50
-        Pa = 200
-        Pb = 400
-        D = [[5, 5, 5], [5, 5]]
-        Dmax = 18
-        Davg = 10
-        Dmin = 2
-        du = 0.02
-        dt = 1
-        a = 50
+import math
+import random
+from collections import deque
 
-        for i in range(100):
-            if not(y[0][0] < 0.05 * yA0):
-                #Подсчеты верхней линии производства
-                print('y[0][0] =', y[0][0])
-                y[0][0] = y[0][0] + x[0][0] - x[0][1]
-                y[1][0] = y[1][0] + x[0][1] - x[0][2]
-                y[1][1] = y[1][1] + x[0][2] - x[0][3]
-                y[1][2] = y[1][2] + x[0][3] - x[0][4]
-                y[3][0] = y[3][0] + x[0][4]
+NUM_DEVICES = 5
+BUFFER_SIZE = 3
+SIMULATION_DETAILS = 10000
 
-                D[0][0] = Dmin + Davg * y[1][0] / D[0][0] + 50*du * Dmax
-                D[0][1] = Dmin + Davg * y[1][1] / D[0][1] + 50*du * Dmax
-                D[0][2] = Dmin + Davg * y[1][2] / D[0][2] + 50*du * Dmax
+processed = 0
 
-                print('D[0][0] =', D[0][0])
-                print('D[0][1] =', D[0][1])
-                print('D[0][2] =', D[0][2])
+lost_all = 0
+total_arrived = 0
 
-                x[0][2] = y[1][0] / D[0][0]
-                x[0][3] = y[1][1] / D[0][1]
-                x[0][4] = y[1][2] / D[0][2]
 
-                print('x[0][2] =', x[0][2])
-                print('x[0][3] =', x[0][3])
-                print('x[0][4] =', x[0][4])
+class Device:
+    def __init__(self, id_num):
+        self.id = id_num
+        self.busy_until = 0.0
+        self.failed_until = 0.0
+        self.buffer = deque()
+        self.total_served = 0
+        self.total_failures = 0
 
-                if y[3][0] >= Pa:
-                    total_details[0] += 1
-                    y[3][0] -= Pa
+    def is_free(self, current_time):
+        if current_time < self.failed_until:
+            return False
+        return current_time >= self.busy_until
 
-            if (y[0][0] < 0.2 * yA0):
-                y[0][0] += x[0][0]
+    def try_add_to_buffer(self, arrival_time):
+        if len(self.buffer) < BUFFER_SIZE:
+            self.buffer.append(arrival_time)
+            return True
+        else:
+            return False
 
-            if not(y[0][1] < 0.05 * yB0):
-                #Подсчеты нижней линии производства
-                y[0][1] = y[0][1] + x[1][0] - x[1][1]
-                y[2][0] = y[2][0] + x[1][1] - x[1][2]
-                y[2][1] = y[2][1] + x[1][2] - x[1][3]
-                y[3][1] = y[3][1] + x[1][3]
+    def start_service_from_buffer(self, current_time):
+        if len(self.buffer) > 0:
+            arrival_time = self.buffer.popleft()
 
-                D[1][0] = Dmin + Davg * y[2][0] / D[1][0] + 50 * du * Dmax
-                D[1][1] = Dmin + Davg * y[2][1] / D[1][1] + 50 * du * Dmax
+            service = service_duration()
+            if need_reconfiguration():
+                service += reconfiguration_time()
 
-                x[1][2] = y[2][0] / D[1][0]
-                x[1][3] = y[2][1] / D[1][1]
+            if not is_working():
+                self.total_failures += 1
+                self.failed_until = current_time + fix_time()
+                self.busy_until = current_time
+                self.buffer.appendleft(arrival_time)
+                return False
 
-                if y[3][1] >= Pb:
-                    total_details[1] += 1
-                    y[3][1] -= Pb
+            self.busy_until = current_time + service
+            self.total_served += 1
+            return True
+        return False
 
-            if (y[0][1] < 0.2 * yA0):
-                y[0][1] += x[0][1]
+def new_detail_time():
+    return random.uniform(3, 7)
 
-        print(total_details)
 
-class NumberTwo:
-    pass
+def to_next():
+    return 1.0
 
-NumberOne.number_one()
+
+def service_duration():
+    return -5 * math.log(random.random())
+
+
+def need_reconfiguration():
+    return random.random() <= 0.2
+
+
+def reconfiguration_time():
+    return -4 * math.log(random.random())
+
+
+def is_working():
+    return random.random() >= 0.1
+
+
+def fix_time():
+    return max(0.1, random.gauss(15, 3))
+
+
+devices = [Device(i) for i in range(NUM_DEVICES)]
+
+current_time = 0.0
+next_arrival = new_detail_time()
+
+while total_arrived < SIMULATION_DETAILS:
+    current_time = next_arrival
+    total_arrived += 1
+
+    detail_arrival_to_line = current_time
+    detail_processed = False
+
+    for i, device in enumerate(devices):
+        arrival_to_device = detail_arrival_to_line + i * to_next()
+
+        if device.is_free(arrival_to_device):
+            device.start_service_from_buffer(arrival_to_device)
+
+        if device.is_free(arrival_to_device) and len(device.buffer) == 0:
+            service = service_duration()
+            if need_reconfiguration():
+                service += reconfiguration_time()
+
+            if not is_working():
+                device.total_failures += 1
+                device.failed_until = arrival_to_device + fix_time()
+                device.busy_until = arrival_to_device
+                if device.try_add_to_buffer(arrival_to_device):
+                    pass
+                else:
+                    pass
+            else:
+                device.busy_until = arrival_to_device + service
+                device.total_served += 1
+                detail_processed = True
+                break
+        else:
+            if device.try_add_to_buffer(arrival_to_device):
+                detail_processed = True
+                break
+            else:
+                continue
+
+    if not detail_processed:
+        lost_all += 1
+
+    next_arrival = current_time + new_detail_time()
+
+max_simulation_time = max(d.busy_until for d in devices)
+max_simulation_time = max(max_simulation_time, max(d.failed_until for d in devices))
+
+current_time = next_arrival
+while any(len(d.buffer) > 0 or not d.is_free(current_time) for d in devices):
+    next_event_time = float('inf')
+
+    for device in devices:
+        if device.failed_until > current_time:
+            next_event_time = min(next_event_time, device.failed_until)
+        if device.busy_until > current_time:
+            next_event_time = min(next_event_time, device.busy_until)
+
+    if next_event_time == float('inf'):
+        break
+
+    current_time = next_event_time
+
+    for device in devices:
+        if current_time >= device.failed_until and device.failed_until > 0:
+            device.failed_until = 0
+
+        if device.is_free(current_time):
+            device.start_service_from_buffer(current_time)
+
+total_processed = sum(d.total_served for d in devices)
+
+
+print(NUM_DEVICES)
+print(BUFFER_SIZE)
+print(total_arrived)
+print(total_processed, total_processed / total_arrived * 100)
+print(lost_all)
