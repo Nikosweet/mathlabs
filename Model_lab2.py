@@ -70,10 +70,9 @@ def run_simulation(num_devices, buffer_size, num_details=100000):
                     device.total_failures += 1
                     device.failed_until = arrival_to_device + max(0.1, random.gauss(15, 3))
                     device.busy_until = arrival_to_device
-                    if device.try_add_to_buffer(arrival_to_device):
-                        pass
-                    else:
-                        pass
+                    device.try_add_to_buffer(arrival_to_device)
+
+
                 else:
                     device.busy_until = arrival_to_device + service
                     device.total_served += 1
@@ -90,9 +89,6 @@ def run_simulation(num_devices, buffer_size, num_details=100000):
             lost_all += 1
 
         next_arrival = current_time + random.uniform(3, 7)
-
-    max_simulation_time = max(d.busy_until for d in devices)
-    max_simulation_time = max(max_simulation_time, max(d.failed_until for d in devices))
 
     current_time = next_arrival
     while any(len(d.buffer) > 0 or not d.is_free(current_time) for d in devices):
@@ -124,8 +120,5 @@ for n in devices_range:
         processed, lost = run_simulation(n, b, 50000)
         percent = processed / 50000 * 100
         print(f'''
-Устройств:{n}
-Размер буфера:{b}
-Выполнено:{processed}
-Потери:{lost}
-Процент:{percent:.2f}%''')
+Устройств:{n} Размер буфера:{b} Выполнено:{processed} Потери:{lost} Процент:{percent:.2f}%''')
+

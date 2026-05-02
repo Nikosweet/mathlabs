@@ -12,20 +12,28 @@ class Functions:
         return 4 * x**2
 
     @classmethod
-    def first_derivative(cls, x: float = 0, func: Callable = f, h: float = 1) -> float:
+    def first_derivative(cls, x: float = 0, func: Callable = f, h: float = 1e-6) -> float:
         return (func(x+h) - func(x)) / (x+h - x)
 
     @classmethod
-    def first_derivative_second(cls, x: float = 0, func: Callable | list = f, h: float = 1) -> float:
+    def first_derivative_second(cls, x: float = 0, func: Callable | list = f, h: float = 1e-6) -> float:
         if type(func) == list:
             return ((func[1] - func[0]) / (2*h))
         return (func(x+h) - func(x-h))/ (2*h)
 
     @classmethod
-    def second_derivative(cls, x: float = 0, func: Callable | list = f, h: float = 1) -> float:
+    def second_derivative(cls, x: float = 0, func: Callable | list = f, h: float = 1e-6) -> float:
         if type(func) == list:
-            return (func[2] - 2 * func[1] + func[0] / (4 * h**2))
+            return ((func[2] - 2 * func[1] + func[0]) / (4 * h**2))
         return (func(x + 2 * h) - 2 * func(x) + func(x-2*h)) / (4 * h**2)
+
+    @classmethod
+    def first_derivative_by_value(cls):
+        pass
+
+    @classmethod
+    def second_derivative_by_value(cls):
+        pass
 
 class NumberOne:
     @staticmethod
@@ -145,7 +153,7 @@ class CubicSpline(Functions):
         plt.savefig('cubicspline.png', dpi=300, bbox_inches='tight')
 
 #NumberOne.first_number()
-CubicSpline.draw_cubic_spline([0, -2, 5, 6, 10], [0, 4, 25, 36, 100])
+CubicSpline.draw_cubic_spline([-2, 0, 5, 6, 10], [4, 0, 25, 36, 100])
 
 print(CubicSpline.first_derivative(0))
 print(CubicSpline.first_derivative(2))
