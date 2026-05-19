@@ -16,6 +16,8 @@ class Functions:
 class Solutions(Functions):
     @classmethod
     def Eiler_recursive(cls, x0: float, y0: float, xn: float, h: float = 1e-1, func: Callable = Functions.f1) -> float:
+        if not callable(func):
+            raise TypeError('func must be callable')
         if (x0 == xn or (x0 > xn and h > 0) or (x0 < xn and h < 0)):
             return y0
         if not h:
@@ -31,6 +33,10 @@ class Solutions(Functions):
     def Eiler(x0: float, y0: float, xn: float, h: float = 1e-6, *, func: Callable = Functions.f1):
         if not h:
             raise ValueError('incorrect value of h')
+        if not callable(func):
+            raise TypeError('func must be callable')
+        if (x0 == xn or (x0 > xn and h > 0) or (x0 < xn and h < 0)):
+            return y0
 
         x = []
         y = []
@@ -58,6 +64,12 @@ class Solutions(Functions):
             raise ValueError('incorrect value of h')
         if h > 0 and x0 > xn:
             h = -h
+        if not callable(func):
+            raise TypeError('func must be callable')
+        if (x0 == xn or (x0 > xn and h > 0) or (x0 < xn and h < 0)):
+            return y0
+        if e <= 0:
+            raise ValueError('e must be positive')
 
         min_h = 1e-100
         max_h = abs(xn - x0)
@@ -109,8 +121,14 @@ class Solutions(Functions):
                     func: Callable = Functions.f1):
         if not h:
             raise ValueError('incorrect value of h')
+        if x_prelast == xn:
+            raise ValueError('x0 and xn are equal')
         if h > 0 and x_prelast > xn:
             h = -h
+        if not callable(func):
+            raise TypeError('func must be callable')
+        if e <= 0:
+            raise ValueError('e must be positive')
 
         x = [x_prelast]
         y = [y_prelast]
@@ -125,6 +143,17 @@ class Solutions(Functions):
 
         x.append(x_last)
         y.append(y_last)
+
+        '''
+        x_last = x0 + h
+        y_last = y0 + h * func(x0, y0)
+
+        x.append(x_last)
+        y.append(y_last)
+
+        if abs(x1 - xn) < abs(h):
+            return y1, x, y
+        '''
 
         while (h > 0 and x_last < xn) or (h < 0 and x_last > xn):
             current_h = h
@@ -167,8 +196,10 @@ class Solutions(Functions):
 
 
     @classmethod
-    def draw(cls, x0: float, y0: float, xn: float, h: float = 1e-6, *, func: Callable = Functions.f1, method: Callable = Eiler, name: str = 'Function'):
+    def draw(cls, x0: float, y0: float, xn: float, h: float = 1e-6, eps=1, *, func: Callable = Functions.f1, method: Callable = Eiler, name: str = 'Function'):
         y0, x, y = method(x0, y0, xn, h, func=func)
+        if not y0 or not x or not y:
+            raise ValueError('y0, x0, and xn не заданы!')
         plt.plot(x, y, 'b-', linewidth=2, label='function')
         plt.xlabel('x')
         plt.ylabel('f(x)')
@@ -182,30 +213,29 @@ class Solutions(Functions):
 
 
 #print(Solutions.Eiler_recursive(0, 0, 10)) # Велика вероятность переполнения стека вызовов
-print('Эйлер, h = 10e-4 ',Solutions.Eiler(0, 0, 10, 10e-4)[0])
-print('Рунге-Кутты-Мерсона, h = 10e-15, e = 10e-15',Solutions.Runge_Kutte_Merson(0, 0, 10, 10e-15, 10e-15)[0])
-print("Эйлера-Адамса, h = 10e-10, e = 10e-10",Solutions.Eiler_Adams(0, 0, 10, 10e-10, 10e-10)[0])
+#print('Эйлер, h = 10e-4 ', Solutions.Eiler(4, 0, -6, 3)[0])
+#print('Рунге-Кутты-Мерсона, h = 10e-15, e = 10e-15',Solutions.Runge_Kutte_Merson(4, 0, -6, 3, 0.01)[0])
+#print("Эйлера-Адамса, h = 10e-10, e = 10e-10",Solutions.Eiler_Adams(4, 0, -6, 3, 0.01)[0])
 
-print('Эйлер, h = 10e-2 ',Solutions.Eiler(0, 0, 10, 10e-2)[0])
-print('Рунге-Кутты-Мерсона, h = 10e-10, e = 10e-10',Solutions.Runge_Kutte_Merson(0, 0, 10, 10e-10, 10e-10)[0])
-print("Эйлера-Адамса, h = 6e-10, e = 6e-10",Solutions.Eiler_Adams(0, 0, 10, 6e-10, 6e-10)[0])
+#print('Эйлер, h = 10e-2 ',Solutions.Eiler(0, 0, 10, 10e-2)[0])#print('Рунге-Кутты-Мерсона, h = 10e-10, e = 10e-10',Solutions.Runge_Kutte_Merson(0, 0, 10, 10e-10, 10e-10)[0])
+#print("Эйлера-Адамса, h = 6e-10, e = 6e-10",Solutions.Eiler_Adams(0, 0, 10, 6e-10, 6e-10)[0])
 
-print('Эйлер, h = 1 ',Solutions.Eiler(0, 0, 10, 1)[0])
-print('Рунге-Кутты-Мерсона, h = 5e-10, e = 5e-10',Solutions.Runge_Kutte_Merson(0, 0, 10, 5e-10, 5e-10)[0])
-print("Эйлера-Адамса, h = 3e-10, e = 3e-10",Solutions.Eiler_Adams(0, 0, 10, 3e-10, 3e-10)[0])
+#print('Эйлер, h = 1 ',Solutions.Eiler(0, 0, 10, 1)[0])
+#print('Рунге-Кутты-Мерсона, h = 5e-10, e = 5e-10',Solutions.Runge_Kutte_Merson(0, 0, 10, 5e-10, 5e-10)[0])
+#print("Эйлера-Адамса, h = 3e-10, e = 3e-10",Solutions.Eiler_Adams(0, 0, 10, 3e-10, 3e-10)[0])
 
-print('Эйлер, h = 10 ',Solutions.Eiler(0, 0, 10, 10)[0])
-print('Рунге-Кутты-Мерсона, h = 2e-10, e = 2e-10',Solutions.Runge_Kutte_Merson(0, 0, 10, 2e-10, 2e-10)[0])
-print("Эйлера-Адамса, h = 2e-10, e = 2e-10",Solutions.Eiler_Adams(0, 0, 10, 2e-10, 2e-10)[0])
+#print('Эйлер, h = 10 ',Solutions.Eiler(0, 0, 10, 10)[0])
+#print('Рунге-Кутты-Мерсона, h = 2e-10, e = 2e-10',Solutions.Runge_Kutte_Merson(0, 0, 10, 2e-10, 2e-10)[0])
+#print("Эйлера-Адамса, h = 2e-10, e = 2e-10",Solutions.Eiler_Adams(0, 0, 10, 2e-10, 2e-10)[0])
 
-print('Рунге-Кутты-Мерсона, h = 1e-10, e = 1e-10',Solutions.Runge_Kutte_Merson(0, 0, 10, 1e-10, 1e-10)[0])
-print("Эйлера-Адамса, h = 1e-10, e = 1e-10",Solutions.Eiler_Adams(0, 0, 10, 1e-10, 1e-10)[0])
-print('Рунге-Кутты-Мерсона, h = 1, e = 1',Solutions.Runge_Kutte_Merson(0, 0, 10, 1, 1)[0])
-print("Эйлера-Адамса, h = 1, e = 1",Solutions.Eiler_Adams(0, 0, 10, 1, 1)[0])
+#print('Рунге-Кутты-Мерсона, h = 1e-10, e = 1e-10',Solutions.Runge_Kutte_Merson(0, 0, 10, 1e-10, 1e-10)[0])
+#print("Эйлера-Адамса, h = 1e-10, e = 1e-10",Solutions.Eiler_Adams(0, 0, 10, 1e-10, 1e-10)[0])
+#print('Рунге-Кутты-Мерсона, h = 1, e = 1',Solutions.Runge_Kutte_Merson(0, 0, 10, 1, 1)[0])
+#print("Эйлера-Адамса, h = 1, e = 1",Solutions.Eiler_Adams(0, 0, 10, 1, 1)[0])
 
 
-print('Рунге-Кутты-Мерсона, h = 10, e = 10',Solutions.Runge_Kutte_Merson(0, 0, 10, 10, 10)[0])
-print("Эйлера-Адамса, h = 10, e = 10",Solutions.Eiler_Adams(0, 0, 10, 10, 10)[0])
-#print(Solutions.draw(0, 0, 10, method=Solutions.Eiler, name='Эйлер'))
-#print(Solutions.draw(0, 0, 10, method=Solutions.Runge_Kutte_Merson, name = 'Рунге-Кутте-Мерсон'))
-#print(Solutions.draw(0, 0, 10, method=Solutions.Eiler_Adams, name = 'Эйлер-Адамс'))
+#print('Рунге-Кутты-Мерсона, h = 10, e = 10',Solutions.Runge_Kutte_Merson(0, 0, 10, 10, 10)[0])
+#print("Эйлера-Адамса, h = 10, e = 10",Solutions.Eiler_Adams(0, 0, 10, 10, 10)[0])
+print(Solutions.draw(-1, 2, 4, 4, method=Solutions.Eiler, name='Эйлер'))
+print(Solutions.draw(-1, 2, 4, 4, method=Solutions.Runge_Kutte_Merson, name = 'Рунге-Кутте-Мерсон'))
+print(Solutions.draw(-1, 2, 4, 4, method=Solutions.Eiler_Adams, name = 'Эйлер-Адамс'))

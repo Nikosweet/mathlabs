@@ -8,6 +8,8 @@ class Functions:
 
     @classmethod
     def derivative(cls, x: list , y: list, h: float = 1e-6):
+        if not x or not y or not h:
+            raise ValueError('Ошибка в диференцировании: не заданы переменные')
         n = len(x)
         derivatives = [(-3*y[0] + 4*y[1] - y[2]) / (2*h)]
         for i in range(1, n-1):
@@ -17,6 +19,8 @@ class Functions:
 
     @classmethod
     def second_derivative(cls, x: list, y: list, h: float = 1e-6):
+        if not x or not y or not h:
+            raise ValueError('Ошибка в диференцировании: не заданы переменные')
         n = len(x)
         derivatives = []
 
@@ -32,6 +36,8 @@ class Functions:
 
     @classmethod
     def sixth_derivative(cls, x: list, y: list, h: float = 1e-6):
+        if not x or not y or not h:
+            raise ValueError('Ошибка в диференцировании: не заданы переменные')
         n = len(x)
         if n < 7:
             return [0]
@@ -46,6 +52,10 @@ class Functions:
 class Methods:
     @classmethod
     def left_rectangle(cls, x_start: float = 0.5, x_end: float = 4.5, h: float = 1e-3, with_r: bool = False, func: Callable = Functions.func) -> float:
+        if not x_start or not x_end or not h or not with_r or not func:
+            raise ValueError('Параметры left_rectangle заданы неверно!')
+        if not callable(func):
+            raise TypeError('func must be callable')
         total_sum: float = 0
         x = x_start
         if (with_r):
@@ -70,6 +80,12 @@ class Methods:
 
     @classmethod
     def average_rectangle(cls, x_start: float = 0.5, x_end: float = 4.5, h: float = 10e-3, with_r: bool = False, func: Callable = Functions.func) -> float:
+
+        if not x_start or not x_end or not h or not with_r or not func:
+            raise ValueError('Параметры left_rectangle заданы неверно!')
+        if not callable(func):
+            raise TypeError('func must be callable')
+
         total_sum = 0
         x = x_start
         if (with_r):
@@ -91,6 +107,11 @@ class Methods:
 
     @classmethod
     def sixth_order_accuracy(cls, x_start: float = 0.5, x_end: float = 4.5, h: float = 1e-3, with_r: bool = False, func: Callable = Functions.func) -> float:
+
+        if not x_start or not x_end or not h or not with_r or not func:
+            raise ValueError('Параметры left_rectangle заданы неверно!')
+        if not callable(func):
+            raise TypeError('func must be callable')
 
         n_segments = int((x_end - x_start) / h)
 
@@ -136,6 +157,21 @@ class Methods:
 
     @classmethod
     def find_h(cls, function: Callable, x_start: float = 0.5, x_end: float = 4.5, eps: float = 1e-3, p: int = 1):
+
+        if p / int(p) != 1:
+            print('Заданный порядок точности должен быть целочисленным! Продолжаем с округлением в меньшую сторону.')
+            p = int(p)
+        if p < 1:
+            print('Заданный порядок точности должен быть натуральным числом! Продолжаем с порядком точности = 1')
+            p = 1
+        if eps <= 0:
+            print('Ошибка в задании epsilon, продолжаем со значением по умолчанию!')
+            eps = 1e-3
+        if not x_start or not x_end or not function or not eps or not p:
+            raise ValueError('Параметры left_rectangle заданы неверно!')
+        if not callable(function):
+            raise TypeError('func must be callable')
+
         h = (x_end - x_start) / 4
 
         while True:

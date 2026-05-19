@@ -1,6 +1,5 @@
 from math import inf
 
-
 class Matrix:
     @classmethod
     def input_matrix(cls):

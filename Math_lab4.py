@@ -1,5 +1,6 @@
 #Разрывы
 #Производная по-другому
+
 from math import inf
 from typing import Callable
 from Math_lab2 import Thomas
