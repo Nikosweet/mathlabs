@@ -80,6 +80,7 @@ def run_simulation(num_devices, buffer_size, num_details=100000):
                     device.total_served += 1
                     detail_processed = True
                     break
+
             else:
                 if device.try_add_to_buffer(arrival_to_device):
                     detail_processed = True
@@ -93,21 +94,28 @@ def run_simulation(num_devices, buffer_size, num_details=100000):
         next_arrival = current_time + random.uniform(3, 7)
 
     current_time = next_arrival
-    while any(len(d.buffer) > 0 or not d.is_free(current_time) for d in devices):
-        next_event_time = float('inf')
+    while any(len(d.buffer) > 0 for d in devices):
+
+        processed_any = False
         for device in devices:
-            if device.failed_until > current_time:
-                next_event_time = min(next_event_time, device.failed_until)
-            if device.busy_until > current_time:
-                next_event_time = min(next_event_time, device.busy_until)
-        if next_event_time == float('inf'):
-            break
-        current_time = next_event_time
-        for device in devices:
-            if current_time >= device.failed_until and device.failed_until > 0:
-                device.failed_until = 0
-            if device.is_free(current_time):
-                device.start_service_from_buffer(current_time)
+            if device.is_free(current_time) and len(device.buffer) > 0:
+                if device.start_service_from_buffer(current_time):
+                    processed_any = True
+
+        if not processed_any:
+            next_event_time = float('inf')
+            for device in devices:
+                if device.failed_until > current_time:
+                    next_event_time = min(next_event_time, device.failed_until)
+                if device.busy_until > current_time:
+                    next_event_time = min(next_event_time, device.busy_until)
+
+            current_time = next_event_time
+
+            for device in devices:
+                if current_time >= device.failed_until and device.failed_until > 0:
+                    device.failed_until = 0
+
 
     total_processed = sum(d.total_served for d in devices)
     return total_processed, lost_all
