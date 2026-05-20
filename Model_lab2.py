@@ -44,7 +44,6 @@ def run_simulation(num_devices, buffer_size, num_details=100000):
 
     devices = [Device(i) for i in range(num_devices)]
 
-    current_time = 0.0
     next_arrival = random.uniform(3, 7)
     total_arrived = 0
     lost_all = 0
