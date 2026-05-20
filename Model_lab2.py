@@ -26,21 +26,21 @@ def run_simulation(num_devices, buffer_size, num_details=100000):
                 return False
 
         def start_service_from_buffer(self, current_time):
-            if len(self.buffer) > 0:
-                arrival_time = self.buffer.popleft()
-                service = -5 * math.log(random.random())
-                if random.random() <= 0.2:
-                    service += -4 * math.log(random.random())
-                if random.random() >= 0.9:
-                    self.total_failures += 1
-                    self.failed_until = current_time + max(0.1, random.gauss(15, 3))
-                    self.busy_until = current_time
-                    self.buffer.appendleft(arrival_time)
-                    return False
-                self.busy_until = current_time + service
-                self.total_served += 1
-                return True
-            return False
+            if not self.is_free(current_time) or len(self.buffer) == 0:
+                return False
+            arrival_time = self.buffer.popleft()
+            service = -5 * math.log(random.random())
+            if random.random() <= 0.2:
+                service += -4 * math.log(random.random())
+            if random.random() >= 0.9:
+                self.total_failures += 1
+                self.failed_until = current_time + max(0.1, random.gauss(15, 3))
+                self.busy_until = current_time
+                self.buffer.appendleft(arrival_time)
+                return False
+            self.busy_until = current_time + service
+            self.total_served += 1
+            return True
 
     devices = [Device(i) for i in range(num_devices)]
 
@@ -71,6 +71,8 @@ def run_simulation(num_devices, buffer_size, num_details=100000):
                     device.failed_until = arrival_to_device + max(0.1, random.gauss(15, 3))
                     device.busy_until = arrival_to_device
                     device.try_add_to_buffer(arrival_to_device)
+                    detail_processed = True
+                    break
 
 
                 else:
@@ -112,7 +114,7 @@ def run_simulation(num_devices, buffer_size, num_details=100000):
 
 
 devices_range = [1, 2, 3, 4, 5]
-buffer_range = [0, 1, 2, 3, 5]
+buffer_range = [0, 1, 2, 3, 20000]
 
 
 for n in devices_range:
